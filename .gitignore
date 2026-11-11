@@ -17,3 +17,4 @@ venv/
 models/
 out/
 *.parquet
+*.gguf

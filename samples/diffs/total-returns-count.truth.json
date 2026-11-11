@@ -1,0 +1,20 @@
+{
+  "name": "total-returns-count",
+  "diff": "total-returns-count.diff",
+  "ignored": false,
+  "expected": [
+    {
+      "path": "totals.py",
+      "line": 6,
+      "side": "RIGHT",
+      "category": "correctness",
+      "window": 2,
+      "keywords": [
+        "len",
+        "count",
+        "total"
+      ],
+      "needle": "return len(items)"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "docs-only",
+  "diff": "docs-only.diff",
+  "ignored": true,
+  "expected": []
+}
