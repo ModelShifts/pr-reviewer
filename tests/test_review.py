@@ -63,6 +63,25 @@ def test_comments_land_on_diff_lines_and_follow_rules(settings, fake_llm):
     assert "index <=" in llm.prompts[0][1]["content"] or "len(bins)" in llm.prompts[0][1]["content"]
 
 
+def test_only_side_in_the_diff_is_used(settings, fake_llm):
+    reply = json.dumps({"comments": [{
+        "line": 2, "side": "LEFT", "severity": "error", "category": "correctness",
+        "body": "index <= len(bins) reads past the end.",
+    }]})
+    review = review_diff(DIFF, settings, Rules(), llm=fake_llm([reply, SUMMARY]))
+    assert [(c.line, c.side, c.body[:5]) for c in review.comments] == [(2, "RIGHT", "index")]
+
+
+def test_replaced_line_is_commented_on_the_new_side(settings, fake_llm, samples):
+    diff = (samples / "discount-formula.diff").read_text(encoding="utf-8")
+    reply = json.dumps({"comments": [{
+        "line": 5, "side": "LEFT", "severity": "error", "category": "correctness",
+        "body": "The new code does not correctly apply the discount.",
+    }]})
+    review = review_diff(diff, settings, Rules(), llm=fake_llm([reply, SUMMARY]))
+    assert [(c.line, c.side) for c in review.comments] == [(5, "RIGHT")]
+
+
 def test_relaxed_keeps_one_error(settings, fake_llm):
     llm = fake_llm([FILE_REPLY, SUMMARY])
     rules = Rules(strictness="relaxed")

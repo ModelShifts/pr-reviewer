@@ -236,6 +236,9 @@ def _file_prompt(file: FileDiff, rules: Rules, task: dict | None) -> str:
     )
     parts.append(f"category is exactly one of: {categories}.")
     parts.append(
+        "Lines marked + are the new code. Lines marked - are the old code. "
+        "Comment on a RIGHT line when the new code is wrong. "
+        "Comment on a LEFT line only when removing that line is itself the bug. "
         "Use only line numbers and sides from the listing. "
         "severity is error for a definite bug, warning for a concrete risk, note otherwise. "
         'If nothing is wrong, return {"comments":[]}.'
@@ -302,8 +305,13 @@ def _accept(raw: dict, file: FileDiff, rules: Rules) -> Comment | None:
     side = str(raw.get("side", "")).strip().upper()
     if side not in {"LEFT", "RIGHT"}:
         return None
-    if (line, side) not in commentable(file):
-        return None
+    indexed = commentable(file)
+    if (line, side) not in indexed:
+        other = "LEFT" if side == "RIGHT" else "RIGHT"
+        # A new or deleted file has only one side. Keep the line when that side exists.
+        if (line, other) not in indexed:
+            return None
+        side = other
     category = _category(str(raw.get("category", "")), rules)
     if category is None:
         return None
@@ -315,7 +323,29 @@ def _accept(raw: dict, file: FileDiff, rules: Rules) -> Comment | None:
     body = _clean_body(raw.get("body", ""))
     if not body:
         return None
-    return Comment(path=file.path, line=line, side=side, severity=severity, category=category, body=body)
+    comment = Comment(path=file.path, line=line, side=side, severity=severity, category=category, body=body)
+    return _on_replaced_line(comment, file)
+
+
+def _on_replaced_line(comment: Comment, file: FileDiff) -> Comment:
+    """Sit a comment on the new line when a line was replaced.
+
+    The model sometimes marks the old side of a replacement even when the
+    text is about the new code. If it did not quote the deleted line, keep
+    the comment on the added line, which is the one the pull request shows.
+    """
+    if comment.side != "LEFT":
+        return comment
+    indexed = commentable(file)
+    added = indexed.get((comment.line, "RIGHT"))
+    removed = indexed.get((comment.line, "LEFT"))
+    if added is None or removed is None or added.kind != "add" or removed.kind != "del":
+        return comment
+    deleted = removed.text.strip()
+    if deleted and deleted in comment.body:
+        return comment
+    comment.side = "RIGHT"
+    return comment
 
 
 _SEVERITY_RANK = {"error": 0, "warning": 1, "note": 2}

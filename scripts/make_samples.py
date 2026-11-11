@@ -114,8 +114,8 @@ def render_diff(path: str, old: str | None, new: str | None) -> str:
     return text
 
 
-def _finding(path: str, source: str, needle: str, category: str, keywords: list[str]) -> dict:
-    return {
+def _finding(path: str, source: str, needle: str, category: str, keywords: list[str], avoid: list[str] | None = None) -> dict:
+    finding = {
         "path": path,
         "line": line_number(source, needle),
         "side": "RIGHT",
@@ -124,6 +124,9 @@ def _finding(path: str, source: str, needle: str, category: str, keywords: list[
         "keywords": keywords,
         "needle": needle,
     }
+    if avoid:
+        finding["avoid"] = avoid
+    return finding
 
 
 SAMPLES = [
@@ -134,7 +137,7 @@ SAMPLES = [
         "new": PICKER,
         "expected": [_finding(
             "picker.py", PICKER, "if index <= len(bins):", "correctness",
-            ["len", "index", "range", "bound"],
+            ["len", "bound", "off-by", "out of"],
         )],
     },
     {
@@ -144,7 +147,7 @@ SAMPLES = [
         "new": DISCOUNT_NEW,
         "expected": [_finding(
             "billing.py", DISCOUNT_NEW, "return price - price / percent", "correctness",
-            ["divis", "zero", "percent", "100"],
+            ["divis", "zero", "percent", "100", "discount"],
         )],
     },
     {
@@ -155,7 +158,8 @@ SAMPLES = [
         "pr_title": "KAN-4 Return units still available",
         "expected": [_finding(
             "stock.py", STOCK, "return stock - reserved - reserved", "correctness",
-            ["reserved", "twice", "double", "subtract"],
+            ["twice", "double", "subtract"],
+            avoid=["should subtract"],
         )],
     },
     {
@@ -176,6 +180,7 @@ SAMPLES = [
         "expected": [_finding(
             "totals.py", TOTAL_NEW, "return len(items)", "correctness",
             ["len", "count", "total"],
+            avoid=["should return the number", "should return the count", "not their total"],
         )],
     },
     {

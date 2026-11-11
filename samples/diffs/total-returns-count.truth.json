@@ -14,7 +14,12 @@
         "count",
         "total"
       ],
-      "needle": "return len(items)"
+      "needle": "return len(items)",
+      "avoid": [
+        "should return the number",
+        "should return the count",
+        "not their total"
+      ]
     }
   ]
 }

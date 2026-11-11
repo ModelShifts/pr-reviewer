@@ -13,7 +13,8 @@
         "divis",
         "zero",
         "percent",
-        "100"
+        "100",
+        "discount"
       ],
       "needle": "return price - price / percent"
     }

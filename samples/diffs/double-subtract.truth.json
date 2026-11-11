@@ -10,12 +10,14 @@
       "category": "correctness",
       "window": 2,
       "keywords": [
-        "reserved",
         "twice",
         "double",
         "subtract"
       ],
-      "needle": "return stock - reserved - reserved"
+      "needle": "return stock - reserved - reserved",
+      "avoid": [
+        "should subtract"
+      ]
     }
   ],
   "pr_title": "KAN-4 Return units still available"

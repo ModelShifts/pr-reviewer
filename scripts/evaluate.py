@@ -33,6 +33,10 @@ def matches(comment, finding: dict) -> bool:
     if abs(comment.line - int(finding["line"])) > window:
         return False
     body = comment.body.casefold()
+    # Phrases that mean the comment agrees with the bug instead of reporting it.
+    avoid = [str(word).casefold() for word in finding.get("avoid") or []]
+    if any(word in body for word in avoid):
+        return False
     keywords = [str(word).casefold() for word in finding.get("keywords") or []]
     if keywords and not any(word in body for word in keywords):
         return False

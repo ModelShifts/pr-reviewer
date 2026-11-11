@@ -11,9 +11,9 @@
       "window": 2,
       "keywords": [
         "len",
-        "index",
-        "range",
-        "bound"
+        "bound",
+        "off-by",
+        "out of"
       ],
       "needle": "if index <= len(bins):"
     }
