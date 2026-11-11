@@ -33,7 +33,7 @@ _STRICTNESS_GUIDE = {
 }
 
 _MAX_DIFF_LINES = 160
-_CHUNK_LINES = 12
+_CHUNK_LINES = 48
 _MAX_BODY = 1200
 
 
@@ -213,11 +213,36 @@ def _diff_lines(file: FileDiff):
     return [line for hunk in file.hunks for line in hunk.lines]
 
 
+def _starts_block(text: str) -> bool:
+    return text.startswith(("def ", "class ", "async def "))
+
+
 def _chunks(lines, size: int = _CHUNK_LINES):
-    """Small chunks keep a 1.5B model on the lines in front of it."""
+    """Review each top-level function on its own, and keep every piece short.
+
+    A long new file otherwise crowds later bugs out of the reply.
+    """
     if not lines:
         return []
-    return [lines[i : i + size] for i in range(0, len(lines), size)]
+    pieces: list[list] = []
+    current: list = []
+    for line in lines:
+        if _starts_block(line.text) and current:
+            pieces.append(current)
+            current = []
+        current.append(line)
+        if len(current) >= size:
+            pieces.append(current)
+            current = []
+    if current:
+        pieces.append(current)
+    merged: list[list] = []
+    for piece in pieces:
+        if merged and not any(_starts_block(line.text) for line in merged[-1]):
+            merged[-1].extend(piece)
+        else:
+            merged.append(list(piece))
+    return merged
 
 
 def _file_prompt(file: FileDiff, rules: Rules, task: dict | None, lines=None) -> str:
@@ -238,15 +263,18 @@ def _file_prompt(file: FileDiff, rules: Rules, task: dict | None, lines=None) ->
     parts.append(
         "Return "
         '{"comments":[{"line": <int>, "side": "RIGHT or LEFT", "severity": "error|warning|note", '
-        '"category": "<one category>", "body": "one or two sentences"}]}'
+        '"category": "<one category>", "body": "<what is wrong, why it fails, and the fix>"}]}'
     )
     parts.append(f"category is exactly one of: {categories}.")
     parts.append(
-        "Lines marked + are the new code. Lines marked - are the old code. "
+        "Lines marked + are the new code under review. Lines marked - are the old code. "
         "Comment on a RIGHT line when the new code is wrong. "
         "Comment on a LEFT line only when removing that line is itself the bug. "
         "Use only line numbers and sides from the listing. "
         "severity is error for a definite bug, warning for a concrete risk, note otherwise. "
+        "Review every function. Do not stop after the first bug. "
+        "Each body must name the bug, quote the bad expression, say why it fails, and give the replacement. "
+        "Do not agree with a bug, and do not discuss formatting or names. "
         'If nothing is wrong, return {"comments":[]}.'
     )
     return "\n\n".join(parts)
@@ -267,7 +295,8 @@ def _summary_prompt(files: list[FileDiff], comments: list[Comment]) -> str:
         "Findings:",
         *findings,
         'Return {"what_changed":"one sentence","risks":["short point"],"suggested_tests":["short point"]}',
-        "risks and suggested_tests have at most 4 items each. "
+        "risks has one item for every finding, and no others. "
+        "suggested_tests has at most 4 items. "
         "Use only the file names and findings above. Do not mention functions that are not listed. "
         "If there are no findings, say that in risks.",
     ])

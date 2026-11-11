@@ -25,7 +25,7 @@ All four features below work in v1. See [Limitations](#limitations) for what the
 <p align="center">
   <img src="assets/demo.gif" alt="A synthetic diff is reviewed in the local demo, then the same kind of inline comments appear on a pull request" width="100%">
 </p>
-<p align="center"><sub>CLI review, the local demo, and the inline comments on a pull request (<a href="assets/demo.mp4">MP4</a>). The comments were produced by Qwen2.5-Coder-1.5B on CPU. The web demo loads that saved result, and the page says so.</sub></p>
+<p align="center"><sub>CLI review, the local demo, and the inline comments on a pull request (<a href="assets/demo.mp4">MP4</a>). The comments were produced by Qwen2.5-Coder-7B-Instruct (Q4_K_M) on CPU. The web demo loads that saved result, and the page says so.</sub></p>
 
 ## Architecture
 
@@ -141,9 +141,11 @@ To try it without a paid key, run an open model behind a local OpenAI-compatible
 ```bash
 pip install "llama-cpp-python[server]" huggingface_hub \
   --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu   # prebuilt CPU wheels, no compiler needed
-hf download Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF qwen2.5-coder-1.5b-instruct-q4_k_m.gguf --local-dir models
-python -m llama_cpp.server --model models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf --n_ctx 4096 --port 8001
-# then: MS_API_BASE=http://127.0.0.1:8001/v1  MS_API_KEY=local  MS_MODEL=qwen2.5-coder-1.5b-instruct-q4_k_m
+hf download Qwen/Qwen2.5-Coder-7B-Instruct-GGUF qwen2.5-coder-7b-instruct-q4_k_m.gguf --local-dir models
+python -m llama_cpp.server --model models/qwen2.5-coder-7b-instruct-q4_k_m.gguf \
+  --model_alias qwen2.5-coder-7b --n_ctx 4096 --port 8001
+# then: MS_API_BASE=http://127.0.0.1:8001/v1  MS_API_KEY=local  MS_MODEL=qwen2.5-coder-7b
+# If memory is short, use Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF and qwen2.5-coder-1.5b-instruct-q4_k_m.gguf instead.
 ```
 
 ### Rules
@@ -184,7 +186,7 @@ python scripts/evaluate.py       # compare the configured backend with the groun
 
 - Inline comments are only attached to lines that appear in the diff. A comment the model places on any other line is dropped.
 - The model can miss a bug, comment on code that is fine, or describe a change backwards. `scripts/evaluate.py` compares comments with the synthetic diffs in `samples/diffs`. Those diffs are small and fictional. This repository does not report a score for real pull requests.
-- On a CPU, review with the 1.5B coder model takes a few minutes for these samples. The 7B default needs a GPU or a lot of memory. CPU runs load the open model in bfloat16.
+- On a CPU, the 7B model runs as a Q4_K_M GGUF through llama.cpp. Loading that same 7B checkpoint with transformers needs a GPU or a lot of memory. The hf backend loads weights in bfloat16, so on CPU set `MS_HF_MODEL` to the 1.5B model. These samples take about a minute each with the 7B GGUF.
 - The action posts one comment review per run. It does not approve the pull request or request changes. Running it again posts another review.
 - GitHub rejects an inline comment whose line is not in the pull request diff. Those comments are left out of the posted review.
 - jira-bridge runs only when `jira.enabled` is true, the package is installed, and a local Jira config file exists. `jira.send: false` previews the comment and does not post it. The web demo always previews.

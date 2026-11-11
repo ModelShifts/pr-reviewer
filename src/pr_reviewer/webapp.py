@@ -13,7 +13,7 @@ from .diffparse import FileDiff, parse_diff
 from .review import Comment, Review, review_diff
 from .rules import JiraRules, Rules, load_rules, resolve_rules_path
 
-FIELD_NOTE = "Loaded a saved result for this diff, computed earlier by"
+FIELD_NOTE = "Loaded a saved result for this diff, computed earlier on CPU by"
 
 
 def samples_dir() -> Path:
