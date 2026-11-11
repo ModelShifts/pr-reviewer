@@ -33,6 +33,7 @@ _STRICTNESS_GUIDE = {
 }
 
 _MAX_DIFF_LINES = 160
+_CHUNK_LINES = 12
 _MAX_BODY = 1200
 
 
@@ -194,27 +195,32 @@ def _system_prompt() -> dict[str, str]:
     }
 
 
-def _format_file(file: FileDiff) -> str:
+def _format_lines(lines) -> str:
     rows: list[str] = []
-    used = 0
-    for hunk in file.hunks:
-        if rows:
-            rows.append("-----")
-        for line in hunk.lines:
-            if used >= _MAX_DIFF_LINES:
-                rows.append("... truncated")
-                return "\n".join(rows)
-            if line.kind == "add":
-                rows.append(f"{line.new_line:5d} RIGHT +{line.text}")
-            elif line.kind == "del":
-                rows.append(f"{line.old_line:5d} LEFT  -{line.text}")
-            else:
-                rows.append(f"{line.new_line:5d} RIGHT  {line.text}")
-            used += 1
+    for line in lines[:_MAX_DIFF_LINES]:
+        if line.kind == "add":
+            rows.append(f"{line.new_line:5d} RIGHT +{line.text}")
+        elif line.kind == "del":
+            rows.append(f"{line.old_line:5d} LEFT  -{line.text}")
+        else:
+            rows.append(f"{line.new_line:5d} RIGHT  {line.text}")
+    if len(lines) > _MAX_DIFF_LINES:
+        rows.append("... truncated")
     return "\n".join(rows)
 
 
-def _file_prompt(file: FileDiff, rules: Rules, task: dict | None) -> str:
+def _diff_lines(file: FileDiff):
+    return [line for hunk in file.hunks for line in hunk.lines]
+
+
+def _chunks(lines, size: int = _CHUNK_LINES):
+    """Small chunks keep a 1.5B model on the lines in front of it."""
+    if not lines:
+        return []
+    return [lines[i : i + size] for i in range(0, len(lines), size)]
+
+
+def _file_prompt(file: FileDiff, rules: Rules, task: dict | None, lines=None) -> str:
     categories = ", ".join(rules.focus)
     parts = [
         f"Strictness: {rules.strictness}. {_STRICTNESS_GUIDE[rules.strictness]}",
@@ -228,7 +234,7 @@ def _file_prompt(file: FileDiff, rules: Rules, task: dict | None) -> str:
         parts.append(
             f"Jira {task.get('key', '')}: {task.get('summary', '')}\n{description}".rstrip()
         )
-    parts.append(_format_file(file))
+    parts.append(_format_lines(lines if lines is not None else _diff_lines(file)))
     parts.append(
         "Return "
         '{"comments":[{"line": <int>, "side": "RIGHT or LEFT", "severity": "error|warning|note", '
@@ -262,6 +268,7 @@ def _summary_prompt(files: list[FileDiff], comments: list[Comment]) -> str:
         *findings,
         'Return {"what_changed":"one sentence","risks":["short point"],"suggested_tests":["short point"]}',
         "risks and suggested_tests have at most 4 items each. "
+        "Use only the file names and findings above. Do not mention functions that are not listed. "
         "If there are no findings, say that in risks.",
     ])
 
@@ -479,19 +486,20 @@ def review_diff(
         model_name = getattr(model, "name", None) or model_name
         budget = min(settings.max_new_tokens, 700)
         for file in reviewable:
-            messages = [_system_prompt(), {"role": "user", "content": _file_prompt(file, rules, task)}]
-            try:
-                payload = _complete_json(model, messages, budget)
-            except ValueError:
-                parse_failures += 1
-                continue
-            raw_comments = _comments_from_payload(payload)
-            for raw in raw_comments:
-                accepted = _accept(raw, file, rules)
-                if accepted is None:
-                    dropped += 1
-                else:
-                    comments.append(accepted)
+            for chunk in _chunks(_diff_lines(file)):
+                messages = [_system_prompt(), {"role": "user", "content": _file_prompt(file, rules, task, chunk)}]
+                try:
+                    payload = _complete_json(model, messages, budget)
+                except ValueError:
+                    parse_failures += 1
+                    continue
+                raw_comments = _comments_from_payload(payload)
+                for raw in raw_comments:
+                    accepted = _accept(raw, file, rules)
+                    if accepted is None:
+                        dropped += 1
+                    else:
+                        comments.append(accepted)
         before_cap = len(comments)
         comments = _cap(comments, rules)
         dropped += before_cap - len(comments)
