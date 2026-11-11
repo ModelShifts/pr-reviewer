@@ -1,0 +1,10 @@
+diff --git a/billing.py b/billing.py
+index 2222222..3333333 100644
+--- a/billing.py
++++ b/billing.py
+@@ -2,4 +2,4 @@
+     """Apply a discount. percent is a number from 0 to 100."""
+     if percent < 0:
+         raise ValueError("percent must be >= 0")
+-    return price * (100 - percent) / 100
++    return price - price / percent

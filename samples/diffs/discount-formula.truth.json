@@ -1,0 +1,22 @@
+{
+  "name": "discount-formula",
+  "diff": "discount-formula.diff",
+  "ignored": false,
+  "expected": [
+    {
+      "path": "billing.py",
+      "line": 5,
+      "side": "RIGHT",
+      "category": "correctness",
+      "window": 2,
+      "keywords": [
+        "divis",
+        "zero",
+        "percent",
+        "100",
+        "discount"
+      ],
+      "needle": "return price - price / percent"
+    }
+  ]
+}

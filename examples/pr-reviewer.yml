@@ -1,4 +1,4 @@
-# Example rules for pr-reviewer (placeholder)
+# Rules for pr-reviewer. Copy this file to .github/pr-reviewer.yml.
 strictness: normal          # relaxed | normal | strict
 focus:
   - correctness
@@ -9,4 +9,5 @@ ignore:
   - "docs/**"
 max_comments: 20
 jira:
-  enabled: false            # set true to link reviews via ModelShifts/jira-bridge
+  enabled: false            # set true to link the review through ModelShifts/jira-bridge
+  send: false               # true posts the comment; false previews it

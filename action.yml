@@ -6,39 +6,56 @@ branding:
   color: "orange"
 inputs:
   backend:
-    description: "api (bring your own OpenAI-compatible key) or hf (open-source model on Hugging Face)"
+    description: "api (OpenAI-compatible endpoint) or hf (local Hugging Face model)"
     default: "api"
   base-url:
-    description: "OpenAI-compatible base URL (backend: api)"
+    description: "OpenAI-compatible base URL (backend: api). Maps to MS_API_BASE."
     required: false
   api-key:
-    description: "API key for the hosted endpoint (backend: api)"
+    description: "API key for the endpoint (backend: api). Maps to MS_API_KEY."
     required: false
   model:
-    description: "Model name (api) or Hugging Face model id (hf)"
+    description: "Model name (api, MS_MODEL) or Hugging Face model id (hf, MS_HF_MODEL)"
     default: "Qwen/Qwen2.5-Coder-7B-Instruct"
   hf-token:
-    description: "Hugging Face token (backend: hf, HF Inference)"
+    description: "Hugging Face token. Only needed for gated models."
     required: false
   config:
-    description: "Path to the rules file"
+    description: "Path to the rules file, relative to the repository root"
     default: ".github/pr-reviewer.yml"
   github-token:
-    description: "Token used to post review comments"
+    description: "Token used to read the pull request and post review comments"
     default: ${{ github.token }}
+  dry-run:
+    description: "Review and print the result without posting it"
+    default: "false"
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: "3.11"
-    - shell: bash
-      run: pip install "${{ github.action_path }}" && python -m pr_reviewer.cli
+    - name: Install pr-reviewer
+      shell: bash
       env:
         MS_BACKEND: ${{ inputs.backend }}
-        OPENAI_BASE_URL: ${{ inputs.base-url }}
-        OPENAI_API_KEY: ${{ inputs.api-key }}
-        LLM_MODEL: ${{ inputs.model }}
+      run: |
+        set -euo pipefail
+        if [ "$MS_BACKEND" = "hf" ]; then
+          pip install "${{ github.action_path }}[hf]"
+        else
+          pip install "${{ github.action_path }}[api]"
+        fi
+    - name: Review the pull request
+      shell: bash
+      run: python -m pr_reviewer
+      env:
+        MS_BACKEND: ${{ inputs.backend }}
+        MS_API_BASE: ${{ inputs.base-url }}
+        MS_API_KEY: ${{ inputs.api-key }}
+        MS_MODEL: ${{ inputs.model }}
+        MS_HF_MODEL: ${{ inputs.model }}
         HF_TOKEN: ${{ inputs.hf-token }}
         PR_REVIEWER_CONFIG: ${{ inputs.config }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
+        PR_REVIEWER_DRY_RUN: ${{ inputs.dry-run }}

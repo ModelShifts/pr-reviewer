@@ -1,0 +1,21 @@
+{
+  "name": "picker-index",
+  "diff": "picker-index.diff",
+  "ignored": false,
+  "expected": [
+    {
+      "path": "picker.py",
+      "line": 3,
+      "side": "RIGHT",
+      "category": "correctness",
+      "window": 2,
+      "keywords": [
+        "len",
+        "bound",
+        "off-by",
+        "out of"
+      ],
+      "needle": "if index <= len(bins):"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "query-concat",
+  "diff": "query-concat.diff",
+  "ignored": false,
+  "expected": [
+    {
+      "path": "query.py",
+      "line": 3,
+      "side": "RIGHT",
+      "category": "security",
+      "window": 2,
+      "keywords": [
+        "select",
+        "sql",
+        "inject",
+        "quote",
+        "param",
+        "concat"
+      ],
+      "needle": "SELECT id FROM items"
+    }
+  ]
+}

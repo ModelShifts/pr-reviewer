@@ -1,0 +1,10 @@
+diff --git a/query.py b/query.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/query.py
+@@ -0,0 +1,4 @@
++def find_item(db, name):
++    """Look up an item by name."""
++    query = "SELECT id FROM items WHERE name = '%s'" % name
++    return db.execute(query)
