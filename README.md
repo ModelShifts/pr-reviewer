@@ -33,8 +33,8 @@ flowchart TB
   S -.-> J["ModelShifts/jira-bridge<br/>(optional)"]:::ink
   subgraph BK["Backend · pick one"]
     direction LR
-    A["<b>(a) Your API key</b><br/>OpenAI-compatible<br/>code model"]:::rust
-    H["<b>(b) Hugging Face</b><br/>Qwen2.5-Coder-7B-Instruct<br/>HF Inference or self-hosted"]:::rust
+    BKA["<b>(a) Your API key</b><br/>OpenAI-compatible<br/>code model"]:::rust
+    BKH["<b>(b) Hugging Face</b><br/>Qwen2.5-Coder-7B-Instruct<br/>HF Inference or self-hosted"]:::rust
   end
   BK -.-> V
 
