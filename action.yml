@@ -1,0 +1,44 @@
+name: "pr-reviewer"
+description: "A GitHub Action that reviews pull requests and leaves comments on the diff."
+author: "Modelshifts"
+branding:
+  icon: "message-square"
+  color: "orange"
+inputs:
+  backend:
+    description: "api (bring your own OpenAI-compatible key) or hf (open-source model on Hugging Face)"
+    default: "api"
+  base-url:
+    description: "OpenAI-compatible base URL (backend: api)"
+    required: false
+  api-key:
+    description: "API key for the hosted endpoint (backend: api)"
+    required: false
+  model:
+    description: "Model name (api) or Hugging Face model id (hf)"
+    default: "Qwen/Qwen2.5-Coder-7B-Instruct"
+  hf-token:
+    description: "Hugging Face token (backend: hf, HF Inference)"
+    required: false
+  config:
+    description: "Path to the rules file"
+    default: ".github/pr-reviewer.yml"
+  github-token:
+    description: "Token used to post review comments"
+    default: ${{ github.token }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    - shell: bash
+      run: pip install "${{ github.action_path }}" && python -m pr_reviewer.cli
+      env:
+        MS_BACKEND: ${{ inputs.backend }}
+        OPENAI_BASE_URL: ${{ inputs.base-url }}
+        OPENAI_API_KEY: ${{ inputs.api-key }}
+        LLM_MODEL: ${{ inputs.model }}
+        HF_TOKEN: ${{ inputs.hf-token }}
+        PR_REVIEWER_CONFIG: ${{ inputs.config }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}

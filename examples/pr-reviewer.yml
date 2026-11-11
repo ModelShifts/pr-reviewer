@@ -1,0 +1,12 @@
+# Example rules for pr-reviewer (placeholder)
+strictness: normal          # relaxed | normal | strict
+focus:
+  - correctness
+  - security
+  - tests
+ignore:
+  - "**/*.lock"
+  - "docs/**"
+max_comments: 20
+jira:
+  enabled: false            # set true to link reviews via ModelShifts/jira-bridge
