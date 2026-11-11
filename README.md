@@ -15,6 +15,8 @@
 
 ## Features
 
+Planned for v1. Progress is tracked in the Roadmap below.
+
 - **Inline review comments**: comments land on the exact lines of the diff they refer to.
 - **Summary comment**: one comment per pull request with what changed, risks and suggested tests.
 - **Configurable rules**: a `.github/pr-reviewer.yml` file sets what to check, what to ignore and how strict to be.
