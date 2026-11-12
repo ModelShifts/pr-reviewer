@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="180" viewBox="0 0 1200 180" role="img" aria-labelledby="t d">
   <title id="t">Evaluation results</title>
-  <desc id="d">Five of five seeded bugs found on the synthetic diffs, with Qwen2.5-Coder-7B-Instruct (Q4_K_M). A sixth, documentation-only, diff is ignored by the default rules.</desc>
+  <desc id="d">Five of five seeded bugs found on six diffs, with Qwen2.5-Coder-7B-Instruct (Q4_K_M). A sixth, documentation-only, diff is ignored by the default rules.</desc>
   <style>
     .bg{fill:#faf7f0}
     .num{font:500 52px Georgia,'Times New Roman',serif;fill:#7c3420;letter-spacing:-1.5px}

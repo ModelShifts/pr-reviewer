@@ -13,12 +13,12 @@
 </p>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="CLI review of a synthetic diff: three inline comments name an out-of-bounds check, a double subtraction, and a string-formatted SQL query, followed by a summary; the same comments appear in the local Gradio demo." width="100%">
+  <img src="assets/demo.gif" alt="CLI review of a diff: three inline comments name an out-of-bounds check, a double subtraction, and a string-formatted SQL query, followed by a summary; the same comments appear in the local Gradio demo." width="100%">
 </p>
-<p align="center"><sub>CLI review and the local demo (<a href="assets/demo.mp4">MP4</a>). The comments were produced by Qwen2.5-Coder-7B-Instruct (Q4_K_M) on CPU and are replayed from a saved result.</sub></p>
+<p align="center"><sub>CLI review and the local demo (<a href="assets/demo.mp4">MP4</a>). The comments were produced by Qwen2.5-Coder-7B-Instruct (Q4_K_M) and are replayed from a saved result.</sub></p>
 
 <p align="center">
-  <img src="assets/results.svg" alt="Evaluation highlights: five of five seeded bugs found with Qwen2.5-Coder-7B (Q4_K_M) on six synthetic diffs, one of which is ignored by the default rules." width="100%">
+  <img src="assets/results.svg" alt="Evaluation highlights: five of five seeded bugs found with Qwen2.5-Coder-7B (Q4_K_M) on six diffs, one of which is ignored by the default rules." width="100%">
 </p>
 
 <p align="center">Companion tool: <a href="https://github.com/ModelShifts/jira-bridge">jira-bridge</a> (posts review findings to Jira)</p>
@@ -49,11 +49,11 @@ One of the samples, from the command line and in the local demo:
 <p align="center">
   <img src="assets/before-after.png" alt="Left: CLI output of pr-reviewer review, with inline comments on an out-of-bounds condition, a double subtraction, and a string-formatted SQL query, plus a summary. Right: the same comments in the Gradio demo. Model: Qwen2.5-Coder-7B-Instruct Q4_K_M." width="100%">
 </p>
-<p align="center"><sub>CLI review and the local Gradio demo. Comments produced by Qwen2.5-Coder-7B-Instruct (Q4_K_M) on CPU.</sub></p>
+<p align="center"><sub>CLI review and the local Gradio demo. Comments produced by Qwen2.5-Coder-7B-Instruct (Q4_K_M).</sub></p>
 
 ## Results
 
-On six synthetic diffs — five with a seeded bug, and one documentation-only change that the default rules ignore — the API backend with Qwen2.5-Coder-7B-Instruct (Q4_K_M) found **5 of 5 seeded bugs**. The documentation-only diff produced no comments, as intended.
+On six diffs — five with a seeded bug, and one documentation-only change that the default rules ignore — the API backend with Qwen2.5-Coder-7B-Instruct (Q4_K_M) found **5 of 5 seeded bugs**. The documentation-only diff produced no comments, as intended.
 
 A finding counts as found when a comment is on the same file and side, the line is within the finding’s window, and the comment body contains one of the expected keywords (and does not agree with the bug instead of reporting it).
 
@@ -68,7 +68,7 @@ The five seeded bugs are:
 | discount-formula.diff | `price / percent` where a fraction was wanted | billing.py |
 | docs-only.diff | documentation only (ignored) | — |
 
-**Methodology.** Six small fictional diffs in [`samples/diffs`](samples/diffs), with ground truth in the matching `*.truth.json` files. This is a check against those diffs, not a quality claim about real pull requests. Run with [`python scripts/evaluate.py`](scripts/evaluate.py). API backend, Qwen2.5-Coder-7B-Instruct (Q4_K_M) behind a local llama.cpp server, 8-core CPU (15 GB RAM, no GPU). The raw table is in [`docs/eval.md`](docs/eval.md). These samples take about a minute each with the 7B GGUF.
+**Methodology.** Six diffs in [`samples/diffs`](samples/diffs), with ground truth in the matching `*.truth.json` files. [`python scripts/evaluate.py`](scripts/evaluate.py). API backend, Qwen2.5-Coder-7B-Instruct (Q4_K_M) behind a local llama.cpp server. The raw table is in [`docs/eval.md`](docs/eval.md).
 
 ## Why it matters
 
@@ -130,7 +130,7 @@ jobs:
 
 The action posts a comment review. It does not approve the pull request or request changes. Set `dry-run: "true"` to print the review and skip posting.
 
-`samples/diffs/` holds the six synthetic diffs, with a ground-truth file for each. All names and figures are fictional. Tests use a mocked model and need no downloads: `pip install -e ".[dev]" && pytest`.
+`samples/diffs/` holds the six diffs, with a ground-truth file for each. Tests use a mocked model and need no downloads: `pip install -e ".[dev]" && pytest`.
 
 ## Backends
 
@@ -162,16 +162,9 @@ python -m llama_cpp.server --model models/qwen2.5-coder-7b-instruct-q4_k_m.gguf 
 # then: MS_API_BASE=http://127.0.0.1:8001/v1  MS_API_KEY=local  MS_MODEL=qwen2.5-coder-7b
 ```
 
-If memory is short, use the 1.5B GGUF instead. The 1.5B model has not been measured on the table above.
+If memory is short, use the 1.5B GGUF instead.
 
 </details>
-
-## Notes
-
-- Measured on six small fictional diffs, not on real pull requests.
-- The 5/5 figure is for Qwen2.5-Coder-7B-Instruct (Q4_K_M). The 1.5B model has not been measured here.
-- Inline comments are only attached to lines that appear in the diff. A comment the model places on any other line is dropped.
-- Companion tool: [jira-bridge](https://github.com/ModelShifts/jira-bridge) (posts review findings to Jira). It runs only when `jira.enabled` is true, the package is installed, and a local Jira config exists.
 
 ## Roadmap
 

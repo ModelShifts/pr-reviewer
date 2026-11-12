@@ -1,0 +1,233 @@
+{
+  "date": "2026-11-12",
+  "timezone": "Asia/Singapore",
+  "measured_at": "12 November 2026, Asia/Singapore",
+  "model": "Qwen2.5-Coder-7B-Instruct (Q4_K_M)",
+  "model_file": "qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+  "model_alias": "qwen2.5-coder-7b",
+  "backend": "api",
+  "server": "llama.cpp python server, n_ctx 4096, n_threads 8, n_gpu_layers 0",
+  "machine": "8-core CPU (Intel Xeon), 15 GB RAM, no GPU",
+  "command": "python scripts/evaluate.py --out docs/eval.json",
+  "totals": {
+    "found": "5/5",
+    "comments": 5,
+    "true_positives": 5
+  },
+  "results": [
+    {
+      "model": "qwen2.5-coder-7b",
+      "backend": "api",
+      "comments": [
+        {
+          "path": "billing.py",
+          "line": 5,
+          "side": "RIGHT",
+          "severity": "error",
+          "category": "correctness",
+          "body": "The expression `price - price / percent` is incorrect. It calculates the discount as a percentage of the original price, not as a reduction from the original price. The correct formula should be `price * (100 - percent) / 100`. This will apply the discount correctly."
+        }
+      ],
+      "summary": {
+        "what_changed": "The expression `price - price / percent` in billing.py has been corrected to `price * (100 - percent) / 100` to accurately apply the discount.",
+        "risks": [
+          "The change may affect existing calculations that rely on the incorrect formula, potentially leading to financial discrepancies."
+        ],
+        "suggested_tests": [
+          "Unit tests for various discount percentages and prices to ensure the new formula works as expected.",
+          "Integration tests with the billing system to verify no unintended side effects."
+        ],
+        "source": "model"
+      },
+      "files_reviewed": [
+        "billing.py"
+      ],
+      "files_ignored": [],
+      "files_skipped": [],
+      "dropped": 0,
+      "parse_failures": 0,
+      "jira": {
+        "status": "disabled"
+      },
+      "sample": "discount-formula",
+      "seconds": 50.63
+    },
+    {
+      "model": "qwen2.5-coder-7b",
+      "backend": "api",
+      "comments": [],
+      "summary": {
+        "what_changed": "No reviewed files. Every changed file was ignored by the rules or had no text diff.",
+        "risks": [
+          "No issues were reported on the reviewed lines."
+        ],
+        "suggested_tests": [
+          "No file was reviewed, so there is no test to suggest."
+        ],
+        "source": "fallback"
+      },
+      "files_reviewed": [],
+      "files_ignored": [
+        "docs/guide.md"
+      ],
+      "files_skipped": [],
+      "dropped": 0,
+      "parse_failures": 0,
+      "jira": {
+        "status": "disabled"
+      },
+      "sample": "docs-only",
+      "seconds": 0.0
+    },
+    {
+      "model": "qwen2.5-coder-7b",
+      "backend": "api",
+      "comments": [
+        {
+          "path": "stock.py",
+          "line": 3,
+          "side": "RIGHT",
+          "severity": "error",
+          "category": "correctness",
+          "body": "The expression `stock - reserved - reserved` is incorrect. It subtracts the reserved quantity twice, which will always result in a negative number if `reserved` is greater than zero. The correct expression should be `stock - reserved`."
+        }
+      ],
+      "summary": {
+        "what_changed": "Added stock.py with a function to calculate available stock.",
+        "risks": [
+          "The expression `stock - reserved - reserved` in stock.py is incorrect as it subtracts the reserved quantity twice, leading to negative results if `reserved` is greater than zero. The correct expression should be `stock - reserved`."
+        ],
+        "suggested_tests": [
+          "Test with a positive reserved value.",
+          "Test with a zero reserved value.",
+          "Test with a negative reserved value (if applicable).",
+          "Ensure the function handles edge cases correctly."
+        ],
+        "source": "model"
+      },
+      "files_reviewed": [
+        "stock.py"
+      ],
+      "files_ignored": [],
+      "files_skipped": [],
+      "dropped": 0,
+      "parse_failures": 0,
+      "jira": {
+        "status": "disabled"
+      },
+      "sample": "double-subtract",
+      "seconds": 33.35
+    },
+    {
+      "model": "qwen2.5-coder-7b",
+      "backend": "api",
+      "comments": [
+        {
+          "path": "picker.py",
+          "line": 4,
+          "side": "RIGHT",
+          "severity": "error",
+          "category": "correctness",
+          "body": "The condition should be `index < len(bins)` to avoid an out-of-bounds error. The current condition allows for accessing the bin at index `len(bins)`, which is invalid."
+        }
+      ],
+      "summary": {
+        "what_changed": "A new file 'picker.py' was added with 5 lines of code.",
+        "risks": [
+          "The condition in picker.py should be `index < len(bins)` to prevent an out-of-bounds error."
+        ],
+        "suggested_tests": [
+          "Add a test case that checks the behavior when `index` is equal to `len(bins)`."
+        ],
+        "source": "model"
+      },
+      "files_reviewed": [
+        "picker.py"
+      ],
+      "files_ignored": [],
+      "files_skipped": [],
+      "dropped": 0,
+      "parse_failures": 0,
+      "jira": {
+        "status": "disabled"
+      },
+      "sample": "picker-index",
+      "seconds": 29.3
+    },
+    {
+      "model": "qwen2.5-coder-7b",
+      "backend": "api",
+      "comments": [
+        {
+          "path": "query.py",
+          "line": 3,
+          "side": "RIGHT",
+          "severity": "error",
+          "category": "security",
+          "body": "SQL Injection vulnerability. The query string is constructed using string formatting, which allows an attacker to inject malicious SQL code. Use parameterized queries instead."
+        }
+      ],
+      "summary": {
+        "what_changed": "A new file query.py was added with a SQL query constructed using string formatting.",
+        "risks": [
+          "SQL Injection vulnerability due to the use of string formatting for constructing the query, which allows an attacker to inject malicious SQL code."
+        ],
+        "suggested_tests": [
+          "Unit tests to verify that parameterized queries are used instead of string formatting for constructing SQL queries."
+        ],
+        "source": "model"
+      },
+      "files_reviewed": [
+        "query.py"
+      ],
+      "files_ignored": [],
+      "files_skipped": [],
+      "dropped": 0,
+      "parse_failures": 0,
+      "jira": {
+        "status": "disabled"
+      },
+      "sample": "query-concat",
+      "seconds": 27.15
+    },
+    {
+      "model": "qwen2.5-coder-7b",
+      "backend": "api",
+      "comments": [
+        {
+          "path": "totals.py",
+          "line": 6,
+          "side": "RIGHT",
+          "severity": "error",
+          "category": "correctness",
+          "body": "The function now returns the length of items instead of the total price. The bad expression is 'return len(items)'. It fails because it does not calculate the total price as intended. The replacement should be 'return total' to return the correct total price."
+        }
+      ],
+      "summary": {
+        "what_changed": "The function now returns the length of items instead of the total price. The bad expression is 'return len(items)'. It fails because it does not calculate the total price as intended. The replacement should be 'return total' to return the correct total price.",
+        "risks": [
+          "The function now returns the length of items instead of the total price, which will lead to incorrect results in calculations that depend on the total price."
+        ],
+        "suggested_tests": [
+          "Test with a list of prices to ensure the function correctly calculates the total.",
+          "Test with an empty list to ensure the function returns 0.",
+          "Test with a list containing one item to ensure the function returns the correct price.",
+          "Test with a list containing multiple items to ensure the function sums them correctly."
+        ],
+        "source": "model"
+      },
+      "files_reviewed": [
+        "totals.py"
+      ],
+      "files_ignored": [],
+      "files_skipped": [],
+      "dropped": 0,
+      "parse_failures": 0,
+      "jira": {
+        "status": "disabled"
+      },
+      "sample": "total-returns-count",
+      "seconds": 55.99
+    }
+  ]
+}
