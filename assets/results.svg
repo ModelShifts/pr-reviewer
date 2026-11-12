@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="180" viewBox="0 0 1200 180" role="img" aria-labelledby="t d">
+  <title id="t">Evaluation results</title>
+  <desc id="d">Five of five seeded bugs found on six diffs, with Qwen2.5-Coder-7B-Instruct (Q4_K_M). A sixth, documentation-only, diff is ignored by the default rules.</desc>
+  <style>
+    .bg{fill:#faf7f0}
+    .num{font:500 52px Georgia,'Times New Roman',serif;fill:#7c3420;letter-spacing:-1.5px}
+    .lbl{font:500 13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#4e4942;letter-spacing:1.2px}
+    .rule{stroke:#d3cbb8;stroke-width:1}
+  </style>
+  <rect class="bg" width="1200" height="180" rx="16"/>
+  <text class="num" x="60" y="88">5 / 5</text><text class="lbl" x="60" y="122">SEEDED BUGS FOUND</text>
+  <line class="rule" x1="400" y1="40" x2="400" y2="140"/>
+  <text class="num" x="440" y="88">Qwen2.5-Coder-7B</text><text class="lbl" x="440" y="122">Q4_K_M · API BACKEND</text>
+  <line class="rule" x1="800" y1="40" x2="800" y2="140"/>
+  <text class="num" x="840" y="88">6 diffs</text><text class="lbl" x="840" y="122">FIVE BUGS + ONE IGNORED</text>
+</svg>
